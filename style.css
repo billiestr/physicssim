@@ -1,0 +1,64 @@
+html {
+  height: 100%;
+  width: 100%;
+}
+
+#tabs {
+	position: fixed;
+	left: 70px;
+	top: 75px;
+	width: calc(100% - 85px);
+	height: calc(100vh - 100px);
+	overflow-y: auto;
+}
+
+.tab {
+	vertical-align: top	;
+	margin: 6px;
+	padding: 20px;
+	display: inline-block;
+	min-height: 200px;
+	min-width: 200px;
+}
+
+.outline {
+	border: 2px double rgba(30, 30, 30, 0.2)
+}
+
+.rounded {
+	border-radius: 10px;
+}
+
+.hidden {
+	display: none;
+}
+
+.glass {
+	background-color: rgba(5, 5, 5, 0.2);
+	backdrop-filter: blur(3px);
+	box-shadow: 0 0 10px rgba(150, 150, 150, .8);
+	/*box-shadow: inset 0px 0px 2px 2px white;*/
+}
+
+.red {
+	background-color: #b83232;
+	color: #151415;
+	backdrop-filter: blur(0);
+	box-shadow: 0 0 10px rgba(150, 150, 150, .8);
+	border: 2px double black;
+}
+
+#menu-button {
+	position:absolute;
+	left: 10px;
+}
+#menu-button button {
+	height: 30px;
+}
+
+input[type="text"] {
+	width: 80%;
+	border: 0px solid black;
+	box-shadow: 0 0 2px black;
+	border-radius: 3px;
+}
