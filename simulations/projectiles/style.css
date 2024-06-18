@@ -1,9 +1,12 @@
 #main-container {
-    
+    position: absolute;
     border: 10px double green;
     padding: 0;
     margin-top: 50px;
-    width: 100;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 180vh;
+    max-height: calc(100vh-50px);
     /* display: flex;
     flex-direction: row;
     justify-content: center;
@@ -15,20 +18,18 @@
     height: 50vw;
     max-width:96vh;
     max-height: 80vh;
-    background-color: rgb(68, 48, 77);
-    border: 2px double rgba(30, 30, 30, 0.2);
     /* display: block; */
 }
 
 
 #canvas-container {
+    padding: 0;
     width:fit-content;
     height:fit-content;
     overflow: hidden;
     display: inline-block;
     top: 50%;
     /* transform: translateY(-50%); */
-	border: 4px double #550756;
 	box-shadow: 0 0 10px black;
 	border-radius: 15px;
 }
@@ -64,13 +65,14 @@
 } */
 
 #menu {
-    position: absolute;
-    top: 0;
-    height: 50vw;
-    max-height: 80vh;
+    margin:5px;
+    float: right;
     
-
-    width: 200px;
+    top: 0;
+    width: 30vw;
+    height: 50vw;
+    max-width: 48vh;
+    max-height: 80vh;
     background-color: white;
 
     /* top: 50vh; */
