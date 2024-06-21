@@ -1,6 +1,5 @@
 #main-container {
     position: absolute;
-    border: 10px double green;
     padding: 0;
     margin-top: 50px;
     margin-left: auto;
@@ -16,7 +15,7 @@
 #projectile-canvas {
     width: 60vw;
     height: 50vw;
-    max-width:96vh;
+    max-width: 96vh;
     max-height: 80vh;
     /* display: block; */
 }
@@ -24,14 +23,14 @@
 
 #canvas-container {
     padding: 0;
-    width:fit-content;
-    height:fit-content;
+    width: fit-content;
+    height: fit-content;
     overflow: hidden;
     display: inline-block;
     top: 50%;
     /* transform: translateY(-50%); */
-	box-shadow: 0 0 10px black;
-	border-radius: 15px;
+    box-shadow: 0 0 10px black;
+    border-radius: 15px;
 }
 
 /* #projectile-canvas {
@@ -55,19 +54,19 @@
     display: flex;
     justify-content: space-between;
     align-items: center; */
-    /* position:absolute;
+/* position:absolute;
     top: 55%;
     transform: translateY(-50%); */
-    /*
+/*
 	border: 4px double #550756;
 	box-shadow: 0 0 10px black;
 	border-radius: 15px;
 } */
 
 #menu {
-    margin:5px;
+    margin: 5px;
     float: right;
-    
+
     top: 0;
     width: 30vw;
     height: 50vw;
@@ -78,4 +77,4 @@
     /* top: 50vh; */
     /* transform: translateY(-50%); */
     right: 4vw;
-} 
+}
