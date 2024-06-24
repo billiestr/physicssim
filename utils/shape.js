@@ -6,8 +6,8 @@ export function sineWave(ctx, startPos, {stretchFactor=1, offset=0,colour="black
 
 export function drawFunction(
 	ctx, func, 
-	{start=0, end=Infinity, maxlength=600, step=60}={}, 
-	{offset=[0, 0], scale=[1,1], colour="black", width=2}={}
+	{start=0, end=Infinity, maxlength=600, step=6}={}, 
+	{offset=[0, 0], scale=[1,1], colour="black", width=3}={}
 	) {
 	
 	end = Math.min(end, ((maxlength-offset[0])/scale[0]) + start)
@@ -18,7 +18,7 @@ export function drawFunction(
 	ctx.beginPath();
 	
 	let nextPoint = [offset[0], func(start) * scale[1] + offset[1]];
-	for (let x = start; x < end; x+=step) {
+	for (let x = start; x <= end; x+=step) {
 		ctx.moveTo(...nextPoint);
 		nextPoint = [(x-start) * scale[0] + offset[0], func(x) * scale[1] +offset[1]];
 		ctx.lineTo(...nextPoint);
