@@ -27,6 +27,9 @@ html {
 .tab:hover {
 	transform: scale(1.01);
 }
+.tab > img {
+	width: 200px;
+}
 
 
 
