@@ -14,7 +14,7 @@ canvas.height = 500;
 ctx.fillStyle = 'blue';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-import * as drawShape from '.../utils/shape.js'
+import * as drawShape from '../../utils/shape.js'
 
 drawShape.circle(ctx, {x: canvas.width /2, y: canvas.height /2}, canvas.height /2.3)
 

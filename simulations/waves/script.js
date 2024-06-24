@@ -79,7 +79,7 @@ slider.oninput = function() {
 }
 */
 
-import * as drawShape from '.../utils/shape.js'
+import * as drawShape from '../../utils/shape.js'
 
 
 function sine(degreeAngle) {
