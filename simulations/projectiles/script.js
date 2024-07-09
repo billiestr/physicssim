@@ -1,20 +1,98 @@
-const canvas = document.getElementById('projectile-canvas');
-const ctx = canvas.getContext('2d')
-//ctx.imageSmoothingEnabled = false;
+import * as drawShape from '../../utils/shape.js'
+import {Vector} from '../../utils/vector.js'
+import {Asset} from '../../utils/image.js'
 
-/*
-const startButton = document.getElementById("flappy-start")
-const playButton = document.getElementById("flappy-play")
-const scoreText = document.getElementById("flappy-score")
-const highScoreText = document.getElementById("flappy-hscore")
-*/
+
+const canvas = document.getElementById('canvas2');
+const ctx = canvas.getContext('2d')
+
+// number of pixels on the canvas
 canvas.width = 600;
 canvas.height = 500;
-// Draw a rectangle to make the canvas visible
-ctx.fillStyle = 'blue';
+ctx.fillStyle = "gray";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-import * as drawShape from '../../utils/shape.js'
+const cannonBody = new Asset('/assets/cannon-body.png', new Vector(202, 121))
+const cannonCylinder = new Asset('/assets/cannon-cylinder.png', new Vector(284, 73))
 
-drawShape.circle(ctx, {x: canvas.width /2, y: canvas.height /2}, canvas.height /2.3)
+class Menu {
+	constructor() {
+		this._gravityInput = document.getElementById("gravity-input")
+		this._xVelocityInput = document.getElementById("x-vel")
+		this._yVelocityInput = document.getElementById("y-vel")
+	}
+	get gravity() {
+		return this._gravityInput.value
+	}
+	get initialVelocity() {
+		return new Vector(
+			this._xVelocityInput.value,
+			this._yVelocityInput.value
+		)
+	}
+}
+class Time {
+	constructor() {
+		this.lastTime = Date.now();
+		this.deltaTime = 0;
+	}
+	resetDeltaTime() {
+		const now = Date.now();
+		this.deltaTime = (now - this.lastTime) / 1000;
+		this.lastTime = now;
+	}
+}
 
+const menu = new Menu()
+const time = new Time()
+
+
+function drawGraph(offset=[20, 20]) {
+	const acceleration = -menu.gravity
+	const b = 1
+	const vel = menu.initialVelocity
+	
+	// s = ut + 1/2at^2, s=0
+	// t = -u +- sqrt(u^2) / 2a
+	const landTime = 2*vel.y / -acceleration;
+	const finalDistance = landTime * vel.x 
+	const maximumHeight = vel.y * landTime/2 + acceleration/2 * landTime**2/4 
+	console.log(finalDistance, maximumHeight)
+	drawShape.drawFunction(ctx, (horizontalDistance) => {
+		const time = horizontalDistance / vel.x
+		const height = vel.y * time - menu.gravity/2 * time**2 
+		return height;
+	}, {step: finalDistance/100, end: finalDistance}, {offset, scale:[100, -100]})
+}
+
+//drawGraph()
+let angle = -360
+function loop() {
+	const initialVelocity = menu.initialVelocity
+	angle = -Math.atan2(initialVelocity.y, initialVelocity.x)
+	ctx.fillStyle = "gray";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+	time.resetDeltaTime()
+	ctx.translate(10, 300)
+	ctx.save()
+	ctx.translate(170, 40)
+	ctx.rotate(angle)
+	//ctx.translate(-120, -40)
+	cannonCylinder.draw(ctx, -120, -40)
+	ctx.restore()
+	ctx.save()
+
+	cannonBody.draw(ctx, 10, 30)
+	ctx.restore()
+	ctx.translate(-10, -300)
+	const cannonEnd = new Vector(
+		10 + 170 + Math.cos(angle) * 150,
+		340 + Math.sin(angle) * 150
+	)
+	drawShape.circle(ctx, cannonEnd, 5)
+	
+	drawGraph(cannonEnd.array())
+	requestAnimationFrame(loop)
+}
+loop()

@@ -9,15 +9,26 @@
 </head>
 
 <body>
-  <a href="../../" id="menu-button">
-    <button type="">Menu</button>
-  </a>
+  <button type="" onclick="location.href='../../'">Menu</button>
   <div id="main-container" class="outline">
     <div id="canvas-container">
-      <canvas id="projectile-canvas"></canvas>
+      <canvas id="canvas2"></canvas>
     </div>
     <div id="menu" class="menu-container">
-      hi
+      <fieldset>
+        <legend>Initial Velocity:</legend>
+        <label for="x-vel">X:</label>
+        <input id="x-vel" class="velocity-input" value="1" type="number">
+        <label for="y-vel">Y:</label>
+        <input id="y-vel" class="velocity-input" value="2" type="number"><br>
+      </fieldset>
+      
+      <label for="gravity-input">
+        Gravity:
+      </label>
+      <input id="gravity-input" type="number" value="9.8" />
+      <br>
+      <input id="run-stop-button" type="button" value="Run!"><br>
     </div>
   </div>
   <script src="script.js" type="module"></script>
