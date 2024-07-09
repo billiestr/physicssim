@@ -12,8 +12,8 @@ canvas.height = 500;
 ctx.fillStyle = "gray";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-const cannonBody = new Asset('/assets/cannon-body.png', new Vector(202, 121))
-const cannonCylinder = new Asset('/assets/cannon-cylinder.png', new Vector(284, 73))
+const cannonBody = new Asset('../../assets/cannon-body.png', new Vector(202, 121))
+const cannonCylinder = new Asset('../../assets/cannon-cylinder.png', new Vector(284, 73))
 
 class Menu {
 	constructor() {
