@@ -85,6 +85,35 @@ function getProjectileCurve() {
 	}}
 	
 }
+function drawLines(spacing, maxDistance, lineLength, lineWidth, direction) {
+	let startLine;
+	let endLine;
+	if (direction == "horizontal") {
+		startLine = i => new Vector(0, -i);
+		endLine = new Vector((lineLength+0.05), 0)
+	} else if (direction == "vertical") {
+		startLine = i => new Vector(i, 0)
+		endLine = new Vector(0, -lineLength+0.05)
+	} else {return}
+	ctx.lineWidth = lineWidth
+	ctx.beginPath()
+	for (let i = 0; i < maxDistance; i += spacing) {
+		console.log(i)
+		const startLinePos = startLine(i)
+		ctx.moveTo(...startLinePos.array())
+		ctx.lineTo(...startLinePos.add(endLine).array())
+	};
+	ctx.stroke()
+}
+
+
+function drawGrid(maxHorizontal, maxVertical) {
+
+	drawLines(0.1, maxHorizontal, maxVertical, 1, "vertical")
+	drawLines(0.1, maxVertical, maxHorizontal, 1, "horizontal")
+	drawLines(1, maxHorizontal, maxVertical, 5, "vertical")
+	drawLines(1, maxVertical, maxHorizontal, 5, "horizontal")
+}
 
 //drawGraph()
 let angle = -360
@@ -99,37 +128,25 @@ function loop() {
 
 	const {finalDistance, maximumHeight, func} = getProjectileCurve();
 	const scale = 3 / (2+Math.max(finalDistance, maximumHeight*3))
-	console.log(scale)
+	//console.log(scale)
 	
 	const cannonEnd = new Vector(
 		170 + Math.cos(angle) * 150,
 		40 + Math.sin(angle) * 150
 	)
 
-	func(cannonEnd.scale(scale), new Vector(200*scale, -200*scale))
-	ctx.scale(scale, scale)
-
-	ctx.beginPath()
-	console.log('a',finalDistance)
-	const step = (Math.abs(finalDistance) > 5 ? 1 : 0.1)
-	for (let i = 0; i < Math.abs(finalDistance)+0.1; i += step) {
-		const startLine = cannonEnd.add2(i*200*Math.sign(finalDistance))
-		ctx.moveTo(...startLine.array())
-		ctx.lineTo(...startLine.add2(0, -(maximumHeight+0.15)*200).array())
-	}
-	for (let i = 0; i < maximumHeight+0.1; i += step) {
-		const startLine = cannonEnd.add2(0,-i*200)
-		ctx.moveTo(...startLine.array())
-		ctx.lineTo(...startLine.add2((finalDistance+0.15)*200).array())
-	}
-	ctx.stroke()
-
 	
+
+	ctx.scale(scale, scale)
+	ctx.translate(...cannonEnd.array())
+	ctx.scale(200)
+	func(Vector.ZERO, new Vector(1, -1))
+	drawGrid(finalDistance, maximumHeight)
+	ctx.translate(...cannonEnd.scale(-1).array())
 
 	ctx.save()
 	ctx.translate(170, 40)
 	ctx.rotate(angle)
-	//ctx.translate(-120, -40)
 	cannonCylinder.draw(ctx, -120, -40)
 	ctx.restore()
 	cannonBody.draw(ctx, 10, 30)
@@ -139,6 +156,7 @@ function loop() {
 	ctx.resetTransform()
 
 	//drawGraph(cannonEnd.array())
-	requestAnimationFrame(loop)
+	//requestAnimationFrame(loop)
+	setTimeout(()=>{loop();}, 1000)
 }
 loop()
