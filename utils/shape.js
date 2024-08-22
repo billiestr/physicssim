@@ -1,3 +1,5 @@
+import {Vector} from './vector.js';
+
 export function sineWave(ctx, startPos, {stretchFactor=1, offset=0,colour="black"}={}) {
 	drawFunction(ctx, (x) => {
 		return Math.sin(x*Math.PI/180)
@@ -25,6 +27,32 @@ export function drawFunction(
 	}
 	ctx.stroke();
 	
+	ctx.restore()
+}
+
+export function drawParametricFunction(
+	ctx, func, 
+	{start=0, end=100, step=6}={}, 
+	{offset=Vector.ZERO, scale=new Vector(1,1), colour="black", width=3}={}
+	) {
+
+	ctx.save()
+	ctx.strokeStyle = colour;
+	ctx.lineWidth = width;
+	ctx.beginPath();
+
+	let nextPoint = offset.add(func(0).scale2(...scale.array()))
+	//console.log(func(0))
+	for (let t = start; t < end; t+=step) {
+		ctx.moveTo(...nextPoint.array());
+		nextPoint = offset.add(func(t).scale2(...scale.array()))
+		ctx.lineTo(...nextPoint.array());
+	}
+	ctx.moveTo(...nextPoint.array());
+	ctx.lineTo(...offset.add(func(end).scale2(...scale.array())).array());
+	
+	ctx.stroke();
+
 	ctx.restore()
 }
 
