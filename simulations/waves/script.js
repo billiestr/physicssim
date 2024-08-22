@@ -1,4 +1,6 @@
-const canvas = document.getElementById('projectile-canvas');
+import * as drawShape from '../../utils/shape.js'
+
+const canvas = document.getElementById('canvas2');
 const ctx = canvas.getContext('2d')
 // number of pixels on the canvas
 canvas.width = 600;
@@ -54,11 +56,6 @@ class Menu {
 		this._frequencyOutput.innerText = frequency
 	}
 }
-const menu = new Menu()
-
-let wavelength = 1
-let frequency = 1
-
 class Time {
 	constructor() {
 		this.lastTime = Date.now();
@@ -70,24 +67,16 @@ class Time {
 		this.lastTime = now;
 	}
 }
+
+const menu = new Menu()
 const time = new Time()
-
-/*
-const slider = document.getElementById("wavelength-slider")
-slider.oninput = function() {
-	if (slider.value > 0) { wavelength = slider.value}
-}
-*/
-
-import * as drawShape from '../../utils/shape.js'
-
 
 function sine(degreeAngle) {
 	return Math.sin((degreeAngle*(Math.PI/180))/menu.wavelength)
 }
+
 ctx.fillStyle = "gray";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
 
 let offset = 0;
 function loop() {
