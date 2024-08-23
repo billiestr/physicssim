@@ -93,33 +93,13 @@ function getProjectileCurve() {
 	}
 
 }
-function drawLines(spacing, maxDistance, lineLength, lineWidth, direction, scale) {
-	let startLine;
-	let endLine;
-	if (direction == "horizontal") {
-		startLine = i => new Vector(0, -i * scale);
-		endLine = new Vector((lineLength + 0.05) * scale, 0)
-	} else if (direction == "vertical") {
-		startLine = i => new Vector(i * scale, 0)
-		endLine = new Vector(0, -(lineLength + 0.05) * scale)
-	} else { return }
-	ctx.lineWidth = lineWidth
-	ctx.beginPath()
-	for (let i = 0; i * spacing < maxDistance; i += 1) {
-		const startLinePos = startLine(i*spacing)
-		ctx.moveTo(...startLinePos.array())
-		ctx.lineTo(...startLinePos.add(endLine).array())
-	};
-	ctx.stroke()
-}
 
 
 function drawGrid(maxHorizontal, maxVertical) {
-
-	drawLines(0.1, maxHorizontal, maxVertical, 1, "vertical", 200)
-	drawLines(0.1, maxVertical, maxHorizontal, 1, "horizontal", 200)
-	drawLines(1, maxHorizontal, maxVertical, 5, "vertical", 200)
-	drawLines(1, maxVertical, maxHorizontal, 5, "horizontal", 200)
+	drawShape.drawLines(ctx, 0.1, maxHorizontal, maxVertical, 1, "vertical", 200)
+	drawShape.drawLines(ctx, 0.1, maxVertical, maxHorizontal, 1, "horizontal", 200)
+	drawShape.drawLines(ctx, 1, maxHorizontal, maxVertical, 5, "vertical", 200)
+	drawShape.drawLines(ctx, 1, maxVertical, maxHorizontal, 5, "horizontal", 200)
 }
 
 //drawGraph()

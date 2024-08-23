@@ -6,6 +6,26 @@ export function sineWave(ctx, startPos, {stretchFactor=1, offset=0,colour="black
 	}, {start:offset}, {colour, offset:startPos, scale: [stretchFactor, 50]})
 }
 
+export function drawLines(ctx, spacing, maxDistance, lineLength, lineWidth, direction, scale) {
+	let startLine;
+	let endLine;
+	if (direction == "horizontal") {
+		startLine = i => new Vector(0, -i * scale);
+		endLine = new Vector((lineLength + 0.05) * scale, 0)
+	} else if (direction == "vertical") {
+		startLine = i => new Vector(i * scale, 0)
+		endLine = new Vector(0, -(lineLength + 0.05) * scale)
+	} else { return }
+	ctx.lineWidth = lineWidth
+	ctx.beginPath()
+	for (let i = 0; i * spacing < maxDistance; i += 1) {
+		const startLinePos = startLine(i*spacing)
+		ctx.moveTo(...startLinePos.array())
+		ctx.lineTo(...startLinePos.add(endLine).array())
+	};
+	ctx.stroke()
+}
+
 export function drawFunction(
 	ctx, func, 
 	{start=0, end=Infinity, maxlength=600, step=6}={}, 
