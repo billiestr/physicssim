@@ -59,15 +59,17 @@ export function drawParametricFunction(
 	ctx.save()
 	ctx.strokeStyle = colour;
 	ctx.lineWidth = width;
-	ctx.beginPath();
 
 	let nextPoint = offset.add(func(0).scale(...scale.array()))
 	
 	for (let t = start; t < end; t+=step) {
+		ctx.beginPath();
 		ctx.moveTo(...nextPoint.array());
 		nextPoint = offset.add(func(t).scale(...scale.array()))
 		ctx.lineTo(...nextPoint.array());
+		ctx.stroke();
 	}
+	ctx.beginPath();
 	ctx.moveTo(...nextPoint.array());
 	ctx.lineTo(...offset.add(func(end).scale(...scale.array())).array());
 	
