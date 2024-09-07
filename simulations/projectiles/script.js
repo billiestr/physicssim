@@ -94,7 +94,7 @@ function drawGraph(offset = [20, 20]) {
 	}, { step: finalDistance / 100, end: finalDistance }, { offset, scale: [100, -100] })
 }
 
-// 
+// calculates the projectile motion of the object and returns a function to draw it.
 function getProjectileCurve() {
 	// values inputted by user
 	const acceleration = -menu.gravity
@@ -111,7 +111,7 @@ function getProjectileCurve() {
 	// you get t = -2u/a
 	const landTime = -2 * vel.y / acceleration;
 	const finalDistance = vel.x * landTime // distance = speed * time
-	const maximumHeight = height(landTime / 2) // maximum height is reached midway through
+	const maximumHeight = height(landTime / 2) // maximum height is reached halfway through
 
 	// updates span values on the HTML document
 	menu.finalDistance = finalDistance;
@@ -186,7 +186,7 @@ function loop() {
 	cannonBody.draw(ctx, 10, 30)
 
 	//drawShape.circle(ctx, cannonEnd, 5, 'red') // TESTING
-	
+
 	// resets all changes to the canvas' context
 	ctx.resetTransform()
 }

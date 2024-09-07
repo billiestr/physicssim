@@ -17,18 +17,19 @@
     font-size: 25px;
     position: absolute;
     padding: 5px;
+    padding-top: 20px;
     right: 10px;
-    width: 250px;
+    width: 260px;
     height: 370px;
     background-color: white;
 
     top: 50%;
     transform: translateY(-50%);
 }
-.velocity-input {
+.velocity-input, #gravity-input {
     margin-left: 5px;
-    width: 30px;
-    height: 20px;
+    width: 62px;
+    height: 25px;
     transform: translateY(-2px);
 }
 
