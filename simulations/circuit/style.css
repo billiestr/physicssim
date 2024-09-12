@@ -6,3 +6,18 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
+#component-menu {
+    padding: 10px;
+    left: 100px;
+    position: absolute;
+    object-fit: contain;
+    height: 100px;
+}
+#component-menu > button {
+    margin-top: 5px;
+    height: 90%;
+}
+#component-menu > button > img {
+    margin-top: 5px;
+    height: 80%;
+}

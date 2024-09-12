@@ -5,20 +5,6 @@ import { Asset } from '../../utils/image.js'
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d')
 
-const componentAssets = {
-	'bulb-on': new Asset("../../assets/lighton.png"),
-	'bulb-off': new Asset("../../assets/lightoff.png"),
-	'ammeter': new Asset("../../assets/ammeter.png"),
-	'diode': new Asset("../../assets/diode.png")
-}
-
-class Component {
-	constructor(type, resistance) {
-		this.input = undefined;
-		this.output = output;
-	}
-}
-
 const nodes = []
 
 let mode = "default"
@@ -27,8 +13,21 @@ const keyPressed = {
 	shift: false
 }
 
+addEventListener("keydown", ({ key, repeat }) => {
+	console.log("aaa")
+	if (repeat) {return}
+	console.log("bbbb")
+	if (key == "Shift") {
+		keyPressed.shift = true;
+		canvas.style.cursor = "grab"
+	}
+})
 addEventListener("keyup", ({ key }) => {
 	switch (key) {
+		case "Shift":
+			keyPressed.shift = false;
+			cursor.panning = false;
+			break;
 		case "w":
 			mode = mode != "drawWire" ? "drawWire" : "default"
 			break;
@@ -39,14 +38,17 @@ addEventListener("keyup", ({ key }) => {
 })
 
 const cursor = {
+	panning: false,
 	activeNode: null,
 	position: Vector.ZERO,
 	pressed: false,
+	initialPanPosition: Vector.ZERO,
+	panOffset: Vector.ZERO,
 	updatePosition: function (canvas, event) {
 		const rect = canvas.getBoundingClientRect()
 		const x = event.clientX - rect.left
 		const y = event.clientY - rect.top
-		this.position = new Vector(x, y);
+		this.position = new Vector(x, y).minus(this.panOffset);
 	}
 }
 
@@ -112,8 +114,15 @@ canvas.addEventListener("click", (event) => {
 	}
 })
 
-canvas.addEventListener("mousedown", (event) => {})
-canvas.addEventListener("mouseup", (event) => {})
+canvas.addEventListener("mousedown", (event) => {
+	if (keyPressed.shift) {
+		cursor.panning = true
+		cursor.initialPanPosition = cursor.panOffset.minus(cursor.position);
+	}
+})
+canvas.addEventListener("mouseup", (event) => {
+	cursor.panning = false;
+})
 
 class Menu {
 	constructor() {
@@ -135,6 +144,12 @@ class Time {
 const menu = new Menu()
 const time = new Time()
 
+/*function drawGrid(maxHorizontal, maxVertical) {
+	drawLines(0.1, maxHorizontal, maxVertical, 1, "vertical", 200)
+	drawLines(0.1, maxVertical, maxHorizontal, 1, "horizontal", 200)
+	drawLines(1, maxHorizontal, maxVertical, 5, "vertical", 200)
+	drawLines(1, maxVertical, maxHorizontal, 5, "horizontal", 200)
+}*/
 
 function draw() {
 	nodes.forEach(node => node.draw())
@@ -143,10 +158,13 @@ function draw() {
 function loop() {
 	ctx.fillStyle = "green";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-	
+	if (cursor.panning) {
+		cursor.panOffset = cursor.initialPanPosition.add(cursor.position)
+		console.log(cursor.position.array())
+	}
+	ctx.translate(...cursor.panOffset.array())
 	draw()
-	
+	ctx.resetTransform()
 	requestAnimationFrame(loop)
 	//setTimeout(() => { loop(); }, 1000)
 }
