@@ -5,21 +5,70 @@ import { Asset } from '../../utils/image.js'
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d')
 
+const componentSize = new Vector(65, 34)
 const componentAssets = {
-	'bulb-on': new Asset("../../assets/lighton.png"),
-	'bulb-off': new Asset("../../assets/lightoff.png"),
-	'ammeter': new Asset("../../assets/ammeter.png"),
-	'diode': new Asset("../../assets/diode.png")
+	'bulb-on': new Asset("../../assets/circuit/lighton.png", componentSize),
+	'bulb': new Asset("../../assets/circuit/lightoff.png", componentSize),
+	'ammeter': new Asset("../../assets/circuit/ammeter.png", componentSize),
+	'resistor': new Asset("../../assets/circuit/resistor.png", componentSize),
+	'diode': new Asset("../../assets/circuit/diode.png", componentSize)
 }
 
-class Component {
-	constructor(type, resistance) {
-		this.input = undefined;
-		this.output = output;
+canvas.addEventListener("click", (event) => {
+	if (cursor.heldComponent) {
+		const newComponent = new Component(cursor.heldComponent, 
+																			cursor.position)
+		components.push(newComponent)
+		cursor.heldComponent = null;
+		return;
+	}
+	nodes.forEach((node) => { node.checkActive(); })
+	const newNodePosition = cursor.position;
+	if (nodes.every((node) => {
+		return !(node.overlaps(newNodePosition))
+	})) {
+		const newNode = new Node(newNodePosition)
+		newNode._hovered = true;
+		nodes.push(newNode)
+	}
+})
+
+const nodes = []
+const components = []
+
+for (const component of ["bulb", "ammeter", "resistor", "diode"]) {
+	document.getElementById(component).onclick = () => {
+		cursor.heldComponent = component;
 	}
 }
 
-const nodes = []
+const cursor = {
+	activeNode: null,
+	position: Vector.ZERO,
+	pressed: false,
+	heldComponent: null,
+	updatePosition: function (canvas, event) {
+		const rect = canvas.getBoundingClientRect()
+		const x = event.clientX - rect.left
+		const y = event.clientY - rect.top
+		this.position = new Vector(x, y);
+	}
+}
+
+class Component {
+	constructor(type, position, resistance) {
+		this.type = type
+		this.position = position;
+		this.resisitance = resistance;
+		this.nodeOne = new Node(this.position.add(new Vector(170)))
+		
+	}
+	draw(ctx) {
+		componentAssets[this.type].draw(ctx, ...this.position.array())
+	}
+}
+
+
 
 let mode = "default"
 
@@ -38,17 +87,7 @@ addEventListener("keyup", ({ key }) => {
 	}
 })
 
-const cursor = {
-	activeNode: null,
-	position: Vector.ZERO,
-	pressed: false,
-	updatePosition: function (canvas, event) {
-		const rect = canvas.getBoundingClientRect()
-		const x = event.clientX - rect.left
-		const y = event.clientY - rect.top
-		this.position = new Vector(x, y);
-	}
-}
+
 
 addEventListener("mousemove", (event) => {
 	cursor.updatePosition(canvas, event)
@@ -96,21 +135,8 @@ resetCanvasResolution()
 addEventListener("resize", resetCanvasResolution)
 
 
-const nodeAsset = new Asset('../../assets/node.webp', new Vector(20, 20))
+const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(20, 20))
 
-
-canvas.addEventListener("click", (event) => {
-	if (keyPressed.shift) { return; }
-	nodes.forEach((node) => { node.checkActive(); })
-	const newNodePosition = cursor.position;
-	if (nodes.every((node) => {
-		return !(node.overlaps(newNodePosition))
-	})) {
-		const newNode = new Node(newNodePosition)
-		newNode._hovered = true;
-		nodes.push(newNode)
-	}
-})
 
 canvas.addEventListener("mousedown", (event) => {})
 canvas.addEventListener("mouseup", (event) => {})
@@ -138,16 +164,23 @@ const time = new Time()
 
 function draw() {
 	nodes.forEach(node => node.draw())
+	components.forEach(component => component.draw(ctx))
+
+	if (cursor.heldComponent) {
+		componentAssets[cursor.heldComponent].draw(ctx, ...cursor.position.array())
+	}
+	
 }
 
 function loop() {
 	ctx.fillStyle = "green";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+
 	
 	draw()
 	
-	requestAnimationFrame(loop)
-	//setTimeout(() => { loop(); }, 1000)
+	//requestAnimationFrame(loop)
+	setTimeout(() => { loop(); }, 500)
 }
 loop()
