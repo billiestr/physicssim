@@ -26,6 +26,7 @@ export function drawLines(ctx, spacing, maxDistance, lineLength, lineWidth, dire
 	ctx.stroke()
 }
 
+// takes a function with an x parameter and draws in onto the canvas
 export function drawFunction(
 	ctx, func, 
 	{start=0, end=Infinity, maxlength=600, step=6}={}, 
@@ -33,11 +34,11 @@ export function drawFunction(
 	) {
 	
 	end = Math.min(end, ((maxlength-offset[0])/scale[0]) + start)
-	
-	ctx.save()
+
+	ctx.save() // stores the state of the current canvas style
 	ctx.strokeStyle = colour;
 	ctx.lineWidth = width;
-	ctx.beginPath();
+	ctx.beginPath(); // creates a new path which will be drawn later
 	
 	let nextPoint = [offset[0], func(start) * scale[1] + offset[1]];
 	for (let x = start; x <= end; x+=step) {
@@ -47,7 +48,7 @@ export function drawFunction(
 	}
 	ctx.stroke();
 	
-	ctx.restore()
+	ctx.restore() // resets the canvas style to what was saved
 }
 
 export function drawParametricFunction(
