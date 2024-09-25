@@ -55,22 +55,8 @@ class Menu {
 	}
 }
 
-// A time object allows an algorithm to better keep track of time and the change of time (deltaTime)
-class Time {
-	constructor() {
-		this.lastTime = Date.now();
-		this.deltaTime = 0;
-	}
-	resetDeltaTime() {
-		const now = Date.now();
-		this.deltaTime = (now - this.lastTime) / 1000;
-		this.lastTime = now;
-	}
-}
-
-// initialises menu and time objects
+// initialises menu object
 const menu = new Menu()
-const time = new Time()
 
 // UNUSED VERSION OF GRAPH DRAWING, NON PARAMETRIC
 function drawGraph(offset = [20, 20]) {
@@ -135,9 +121,11 @@ function getProjectileCurve() {
 
 }
 
-// draws a grid of lines, used before drawing the curve.
+// draws a grid of horizontal and vertical lines
 function drawGrid(maxHorizontal, maxVertical) {
-	// lines drawn every 0.1 metres
+	if (maxHorizontal < 0) { return } // dont draw grid if horizontal velocity is negative
+	
+	// thin lines drawn every 0.1 metres
 	drawShape.drawLines(ctx, 0.1, maxHorizontal, maxVertical, 1, "vertical", 200)
 	drawShape.drawLines(ctx, 0.1, maxVertical, maxHorizontal, 1, "horizontal", 200)
 	// thicker lines drawn every 1 metre
@@ -166,14 +154,13 @@ function loop() {
 	ctx.translate(10, 300) // moves the cannon to the bottom
 
 	// scale to draw the cannon, grid and curve in order to fit it on the screen.
-	//const scale = 3 / (2 + Math.max(finalDistance, maximumHeight * 3))
-	const scale = 1
+	const scale = 3 / (2 + Math.max(finalDistance, maximumHeight * 3))
 	ctx.scale(scale, scale)
 
 	// draws the grid and curve at the cannon end position
 	ctx.translate(...cannonEnd.array())
 	curveFunction(Vector.ZERO, new Vector(200, -200))
-	//drawGrid(finalDistance, maximumHeight, 200)
+	drawGrid(finalDistance, maximumHeight, 200)
 	ctx.translate(...cannonEnd.scale(-1).array())
 
 	// draw cannon cylinder at correct angle
