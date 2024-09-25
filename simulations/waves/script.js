@@ -100,5 +100,3 @@ function loop() {
 	requestAnimationFrame(loop)
 }
 loop()
-
-console.log("yeah")
