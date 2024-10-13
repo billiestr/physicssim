@@ -26,12 +26,13 @@ export function drawLines(ctx, spacing, maxDistance, lineLength, lineThickness, 
 	}
 
 	ctx.lineWidth = lineThickness // line thickness is set
-	
+
 	ctx.beginPath() // a path is created which each line will be added to
 	for (let i = 0; i * spacing < maxDistance; i += 1) {
+		// the vector of the start of the line is calculated.
 		const startLinePos = getLineStartPos(i * spacing)
 		ctx.moveTo(...startLinePos.array())
-		ctx.lineTo(...startLinePos.add(lineEndOffset).array())
+		ctx.lineTo(...startLinePos.add(lineEndOffset).array()) // creates a new line
 	};
 	ctx.stroke() // draws the path
 }
@@ -62,32 +63,34 @@ export function drawFunction(
 	ctx.restore() // resets the canvas style to what was saved
 }
 
+// draws a function which takes some third parameter t and returns an x, y vector
 export function drawParametricFunction(
 	ctx, func,
 	{ start = 0, end = 100, step = 6 } = {},
 	{ offset = Vector.ZERO, scale = new Vector(1, 1), colour = "black", width = 3 } = {}
 ) {
 
-	ctx.save()
+	ctx.save() // stores the state of the current canvas style
 	ctx.strokeStyle = colour;
 	ctx.lineWidth = width;
 
-	let nextPoint = offset.add(func(0).scale(...scale.array()))
+	//
+	ctx.beginPath(); // creates a new path which will be drawn later
 
+	let nextPoint = offset.add(func(0).scale(...scale.array()));
 	for (let t = start; t < end; t += step) {
-		ctx.beginPath();
 		ctx.moveTo(...nextPoint.array());
-		nextPoint = offset.add(func(t).scale(...scale.array()))
+		nextPoint = offset.add(func(t).vectorScale(scale))
 		ctx.lineTo(...nextPoint.array());
 		ctx.stroke();
 	}
-	ctx.beginPath();
+	// completes the path no matter where it was cut off
 	ctx.moveTo(...nextPoint.array());
-	ctx.lineTo(...offset.add(func(end).scale(...scale.array())).array());
+	nextPoint = offset.add(func(end).vectorScale(scale)); // final end point is calculated
+	ctx.lineTo(...nextPoint.array())
+	ctx.stroke() // draws the final line
 
-	ctx.stroke();
-
-	ctx.restore()
+	ctx.restore() // all graphical context changes are reset the state saved before
 }
 
 export function line(ctx, point1, point2, colour = 'red') {

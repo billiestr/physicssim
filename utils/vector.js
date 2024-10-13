@@ -19,11 +19,11 @@ export class Vector {
 	minus(pos) {
 		return new Vector(this.x-pos.x, this.y-pos.y);
 	}
-	scale(factor, factor2) {
-		return new Vector(this.x * factor, this.y * (factor2 || factor))
+	scale(factor, yFactor) {
+		return new Vector(this.x * factor, this.y * (yFactor || factor))
 	}
-	scale2(x, y) {
-		return new Vector(this.x * x, this.y * y)
+	vectorScale(vector) {
+		return new Vector(this.x * vector.x, this.y * vector.y)
 	}
 	magnitude() {
 		return Math.sqrt(this.x**2 + this.y**2)
