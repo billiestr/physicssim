@@ -15,9 +15,14 @@ canvas {
 }
 #component-menu > button {
     margin-top: 5px;
-    height: 90%;
+    height: 90px;
 }
 #component-menu > button > img {
     margin-top: 5px;
     height: 80%;
+}
+#component-menu > button > div {
+    margin-top: 5px;
+    width: 100px;
+    height: 72px;
 }

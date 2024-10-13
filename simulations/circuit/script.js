@@ -5,6 +5,16 @@ import { Asset } from '../../utils/image.js'
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d')
 
+// lists of all creates nodes and components in the canvas.
+const nodes = []
+const components = []
+
+// tells the program how to behave.
+let mode = "default"
+
+// image src for a node
+const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(20, 20))
+// images srcs for each component
 const componentSize = new Vector(65, 34)
 const componentAssets = {
 	'battery': new Asset("../../assets/circuit/battery.png", componentSize),
@@ -15,142 +25,26 @@ const componentAssets = {
 	'diode': new Asset("../../assets/circuit/diode.png", componentSize)
 }
 
-canvas.addEventListener("click", (event) => {
-	if (cursor.heldComponent) {
-		const newComponent = new Component(cursor.heldComponent, 
-																			cursor.position)
-		components.push(newComponent)
-		cursor.heldComponent = null;
-		return;
-	}
-	components.forEach((component) => {
-		if (component.clickCheck(cursor.position)) {
-			cursor.activeNode = component
-		}
-	})
-	nodes.forEach((node) => { node.checkActive(); })
-	const newNodePosition = cursor.position;
-	if (nodes.every((node) => {
-		return !(node.overlaps(newNodePosition))
-	}) && components.every((component) => {
-		return !(component.overlaps(newNodePosition))
-	})) {
-		const newNode = new Node(newNodePosition)
-		newNode._hovered = true;
-		nodes.push(newNode)
-	}
-})
-
-
-const nodes = []
-const components = []
-
+// HTML Component Buttons are linked to their respective component
 for (const component of ["bulb", "ammeter", "resistor", "diode"]) {
 	document.getElementById(component).onclick = () => {
 		cursor.heldComponent = component;
 	}
 }
 
-const cursor = {
-	activeNode: null,
-	position: Vector.ZERO,
-	pressed: false,
-	heldComponent: null,
-	updatePosition: function (canvas, event) {
-		const rect = canvas.getBoundingClientRect()
-		const x = event.clientX - rect.left
-		const y = event.clientY - rect.top
-		this.position = new Vector(x, y);
-	}
+// resizes the canvas to match the display size
+function resetCanvasResolution() {
+	const rect = canvas.getBoundingClientRect();
+	canvas.width = rect.width;
+	canvas.height = rect.height;
 }
+resetCanvasResolution()
+// runs each time the window is resized
+addEventListener("resize", resetCanvasResolution)
 
-const nodeOrder = {
-	list: [],
-	draw: function (ctx) {
-		let currentPoint = this.list[0];
-		for (let i = 1; i < this.list.length-1; i++) {
-			const nextPoint = this.list[i+1];
-			console.log(currentPoint)
-			if (currentPoint instanceof Component ||
-				nextPoint instanceof Component) {
-					i = i + 1
-					currentPoint = this.list[i+1]; 
-					continue;
-				}
-				
-			drawShape.line(ctx, currentPoint.position, nextPoint.position, "black");
-			currentPoint = nextPoint;
-		}
-	}
-}
-
-const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(20, 20))
-class Node {
-	constructor(position) {
-		nodeOrder.list.push(this)
-		this.position = position;
-		this.next = null;
-		this._hovered = false;
-		this._active = false;
-	}
-	overlaps(newNodePosition) {
-		return (this.position.distance(newNodePosition) < 20)
-	}
-	checkHover(mousePos) {
-		this._hovered = (this.position.distance(mousePos) <= 10)
-		return this._hovered
-	}
-	checkActive() {
-		this._active = this._hovered;
-		return this._active;
-	}
-	draw() {
-		if (this._hovered) {
-			drawShape.circle(ctx, this.position, 12, 'rgba(255, 10, 10, 0.5)')
-		}
-		if (this._active) {
-			drawShape.circle(ctx, this.position, 11.5, 'rgb(170, 0, 0)')
-		}
-		nodeAsset.draw(ctx, this.position.x, this.position.y, 0, true)
-	}
-}
-class Component {
-	constructor(type, position, resistance) {
-		this.position = position;
-		this.nodeOne = new Node(this.position.add(new Vector(-32.5, 0)))
-		nodeOrder.list.push(this)
-		this.nodeTwo = new Node(this.position.add(new Vector(32.5, 0)))
-
-		this.type = type
-		this.resisitance = resistance;
-		
-		nodes.push(this.nodeOne, this.nodeTwo)
-		
-	}
-	clickCheck(clickPosition) {
-		return ((Math.abs(this.position.x - clickPosition.x) < 32.5) &&
-			(Math.abs(this.position.y - clickPosition.y) < 17));
-	}
-	overlaps(position) {
-		return (this.position.distance(position) < 65)
-	}
-	draw(ctx) {
-		componentAssets[this.type].draw(ctx, ...this.position.array(), 0, true)
-	}
-}
-components.push(new Component("battery", new Vector(405, 250), 0))
-
-let mode = "default"
-
-const keyPressed = {
-	shift: false
-}
-
+// detects when "Escape" is pressed to remove the held component
 addEventListener("keyup", ({ key }) => {
 	switch (key) {
-		case "w":
-			mode = mode != "drawWire" ? "drawWire" : "default"
-			break;
 		case "Escape":
 			mode = "default"
 			cursor.heldComponent = null;
@@ -158,71 +52,167 @@ addEventListener("keyup", ({ key }) => {
 	}
 })
 
-
-
+// updates the cursor position and checks for hover updates.
 addEventListener("mousemove", (event) => {
 	cursor.updatePosition(canvas, event)
 	nodes.forEach((node) => {
 		node.checkHover(cursor.position)
 	})
+	components.forEach((component) => {
+		component.checkHover(cursor.position)
+	})
 })
 
+function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
+	// any overlapping is checked for, if so the function will end early.
+	const overlaps = nodes.some(node => node.checkOverlap(newNodePosition, newNodeRadius)) ||
+		components.some(component => component.checkOverlap(newNodePosition, newNodeRadius))
+	if (overlaps) { return; }
 
-
-function resetCanvasResolution() {
-	const rect = canvas.getBoundingClientRect();
-	canvas.width = rect.width;
-	canvas.height = rect.height;
+	let newNode;
+	// the newNodeType parameter only has a value if the new node is a Component
+	if (!newNodeType) {
+		newNode = new Node(newNodePosition)
+		nodes.push(newNode) // node is added to the list of nodes.
+	} else {
+		// the is a distinct class for bulbs, this is checked for.
+		newNode = (newNodeType == "bulb") ? new Bulb(newNodePosition) :
+			new Component(newNodeType, newNodePosition)
+		components.push(newNode) // new component is added to list of components
+		cursor.heldComponent = null; // held component is removed from cursor
+	}
+	// the new node will detect whether the cursor is over it.
+	newNode.checkHover(cursor.position)
 }
-resetCanvasResolution()
 
-addEventListener("resize", resetCanvasResolution)
+// ran when the HTML canvas is clicked
+canvas.addEventListener("click", (event) => {
+	// each component and node is checked whether it has been clicked or not
+	for (const node of nodes) { if (node.checkActive()) { return; } }
+	for (const component of components) {
+		if (component.clickCheck(cursor.position)) {
+			cursor.activeNode = component;
+			return;
+		}
+	}
 
-canvas.addEventListener("mousedown", (event) => {})
-canvas.addEventListener("mouseup", (event) => {})
+	// if nothing has been selected, it will attempt to place a node or component
+	const newNodeRadius = cursor.heldComponent ? Component.RADIUS : Node.RADIUS;
+	placeNewNode(cursor.heldComponent, cursor.position, newNodeRadius)
+})
 
-class Menu {
+// keeps track of selected circuit components and mouse position.
+class Cursor {
 	constructor() {
-
+		this.activeNode = null;
+		this.position = Vector.ZERO;
+		this.heldComponent = null;
+	}
+	updatePosition(canvas, event) {
+		// the mouse position is calculated relative to the canvas.
+		const rect = canvas.getBoundingClientRect()
+		const x = event.clientX - rect.left
+		const y = event.clientY - rect.top
+		this.position = new Vector(x, y);
 	}
 }
-class Time {
-	constructor() {
-		this.lastTime = Date.now();
-		this.deltaTime = 0;
+const cursor = new Cursor()
+
+
+class Node {
+	static RADIUS = 10;
+	constructor(position) {
+		this.position = position;
+		this.radius = Node.RADIUS
+		this._hovered = false;
+		this._active = false;
 	}
-	resetDeltaTime() {
-		const now = Date.now();
-		this.deltaTime = (now - this.lastTime) / 1000;
-		this.lastTime = now;
+	// used when a new component or node is added
+	checkOverlap(newNodePosition, otherRadius = 10) {
+		return (this.position.distance(newNodePosition) < this.radius + otherRadius)
+	}
+	// checks whether the cursor is over the node
+	checkHover(mousePos) {
+		this._hovered = this.checkOverlap(mousePos, 0)
+		return this._hovered;
+	}
+	checkActive() {
+		// runs when clicked, if it is hovered then it should be set to be active.
+		this._active = this._hovered;
+		return this._active;
+	}
+	draw() {
+		// visually shows the user whether the node is active/hovered over.
+		if (this._hovered) {
+			drawShape.circle(ctx, this.position, 12, 'rgba(255, 10, 10, 0.5)')
+		}
+		if (this._active) {
+			drawShape.circle(ctx, this.position, 11.5, 'rgb(170, 0, 0)')
+		}
+		// draws the node image
+		nodeAsset.draw(ctx, this.position.x, this.position.y, 0, true)
 	}
 }
 
-const menu = new Menu()
-const time = new Time()
+// builds upon a node, has resistance, types other new properties.
+class Component extends Node {
+	static RADIUS = 50;
+	constructor(type, position, resistance) {
+		super(position)
+		this.radius = Component.RADIUS // overides default node radius
 
+		this.type = type // e.g. "resistor" or "ammeter"
+		this.resisitance = resistance;
 
+		this.nodeIn = new Node(this.position.add(new Vector(-32.5, 0)))
+		this.nodeOut = new Node(this.position.add(new Vector(32.5, 0)))
+		nodes.push(this.nodeIn, this.nodeOut)
+
+	}
+	clickCheck(clickPosition) {
+		return ((Math.abs(this.position.x - clickPosition.x) < 32.5) &&
+			(Math.abs(this.position.y - clickPosition.y) < 17));
+	}
+	draw(ctx) {
+		if (this._hovered) {
+			drawShape.circle(ctx, this.position, this.radius, 'rgba(186, 54, 54, 0.5)')
+		}
+		componentAssets[this.type].draw(ctx, ...this.position.array(), 0, true)
+	}
+}
+components.push(new Component("battery", new Vector(405, 250), 0))
+
+// the bulb will have its own properties such as changing resistance and brightness
+class Bulb extends Component {
+	constructor(position) {
+		super("bulb", position, 1)
+	}
+}
+
+// draws each component and node
 function draw() {
-	if (cursor.activeNode) {
-		drawShape.circle(ctx, cursor.activeNode.position, 20, 'rgba(200, 0, 0, 0.1)')
-	}
-	nodes.forEach(node => node.draw())
-	components.forEach(component => component.draw(ctx))
-
-	if (cursor.heldComponent) {
-		componentAssets[cursor.heldComponent].draw(ctx, ...cursor.position.add2(-32.5, -16).array())
-	}
-	nodeOrder.draw(ctx)
-}
-
-function loop() {
 	ctx.fillStyle = "green";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+	// draws a shadow around a node if active
+	if (cursor.activeNode) {
+		drawShape.circle(ctx, cursor.activeNode.position, 20, 'rgba(200, 0, 0, 0.1)')
+	}
 
-	
+	// draws each node and component
+	nodes.forEach(node => node.draw())
+	components.forEach(component => component.draw(ctx))
+
+	// draws the component held by the cursor
+	if (cursor.heldComponent) {
+		componentAssets[cursor.heldComponent].draw(ctx, ...cursor.position.add2(-32.5, -16).array())
+	}
+}
+
+// main program loop ran each frame.
+function loop() {
 	draw()
-	
+
 	requestAnimationFrame(loop)
 }
 loop()
