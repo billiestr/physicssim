@@ -21,8 +21,3 @@ canvas {
     margin-top: 5px;
     height: 80%;
 }
-#component-menu > button > div {
-    margin-top: 5px;
-    width: 100px;
-    height: 72px;
-}

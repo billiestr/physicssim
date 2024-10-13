@@ -83,17 +83,25 @@ function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
 	}
 	// the new node will detect whether the cursor is over it.
 	newNode.checkHover(cursor.position)
+	cursor.activeNode = null;
+}
+
+// checks each node in an array to see if it has been clicked.
+// if so, it updates the cursors activeNode property.
+function checkArrayActive(arr) {
+	for (const node of arr) { 
+		if (node.checkActive()) { 
+			cursor.activeNode = node;
+			return true; 
+		} 
+	}
 }
 
 // ran when the HTML canvas is clicked
-canvas.addEventListener("click", (event) => {
-	// each component and node is checked whether it has been clicked or not
-	for (const node of nodes) { if (node.checkActive()) { return; } }
-	for (const component of components) {
-		if (component.clickCheck(cursor.position)) {
-			cursor.activeNode = component;
-			return;
-		}
+canvas.addEventListener("click", () => {
+	// if an component is clicked it is made active. If so the function returns early.
+	if (checkArrayActive(nodes) || checkArrayActive(components)) {
+		return;
 	}
 
 	// if nothing has been selected, it will attempt to place a node or component
@@ -125,7 +133,6 @@ class Node {
 		this.position = position;
 		this.radius = Node.RADIUS
 		this._hovered = false;
-		this._active = false;
 	}
 	// used when a new component or node is added
 	checkOverlap(newNodePosition, otherRadius = 10) {
@@ -137,17 +144,16 @@ class Node {
 		return this._hovered;
 	}
 	checkActive() {
-		// runs when clicked, if it is hovered then it should be set to be active.
-		this._active = this._hovered;
-		return this._active;
+		// runs when clicked, if it is being hovered over then it will become the active node.
+		return this._hovered;
+	}
+	drawActive() {
+		drawShape.circle(ctx, this.position, 12, 'rgb(200, 54, 54)');
 	}
 	draw() {
 		// visually shows the user whether the node is active/hovered over.
 		if (this._hovered) {
-			drawShape.circle(ctx, this.position, 12, 'rgba(255, 10, 10, 0.5)')
-		}
-		if (this._active) {
-			drawShape.circle(ctx, this.position, 11.5, 'rgb(170, 0, 0)')
+			drawShape.circle(ctx, this.position, 13, 'rgba(186, 54, 54, 0.6)')
 		}
 		// draws the node image
 		nodeAsset.draw(ctx, this.position.x, this.position.y, 0, true)
@@ -173,9 +179,12 @@ class Component extends Node {
 		return ((Math.abs(this.position.x - clickPosition.x) < 32.5) &&
 			(Math.abs(this.position.y - clickPosition.y) < 17));
 	}
+	drawActive() {
+		drawShape.circle(ctx, this.position, this.radius, 'rgba(186, 54, 54, 0.7)')
+	}
 	draw(ctx) {
 		if (this._hovered) {
-			drawShape.circle(ctx, this.position, this.radius, 'rgba(186, 54, 54, 0.5)')
+			drawShape.circle(ctx, this.position, this.radius, 'rgba(186, 54, 54, 0.3)')
 		}
 		componentAssets[this.type].draw(ctx, ...this.position.array(), 0, true)
 	}
@@ -194,14 +203,13 @@ function draw() {
 	ctx.fillStyle = "green";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	// draws a shadow around a node if active
+	// draws a circle around a node if active
 	if (cursor.activeNode) {
-		drawShape.circle(ctx, cursor.activeNode.position, 20, 'rgba(200, 0, 0, 0.1)')
+		cursor.activeNode.drawActive();
 	}
-
 	// draws each node and component
-	nodes.forEach(node => node.draw())
 	components.forEach(component => component.draw(ctx))
+	nodes.forEach(node => node.draw())
 
 	// draws the component held by the cursor
 	if (cursor.heldComponent) {
