@@ -1,17 +1,16 @@
 import { Vector } from '../../utils/vector.js'
-import { Cursor, Node, Component, Bulb, componentAssets } from './classes.js'
+import { Circuit, Cursor, Node, Component, Bulb, componentAssets } from './classes.js'
 
 const canvas = document.getElementById('main-canvas');
 export const ctx = canvas.getContext('2d')
 
-// lists of all creates nodes and components in the canvas.
-export const nodes = []
-const components = []
 
-
+	
 const cursor = new Cursor()
 
-components.push(new Component("battery", new Vector(405, 250), 0))
+// lists of all creates nodes and components in the canvas.
+export const circuit = new Circuit()
+circuit.initialiseCircuit()
 
 // tells the program how to behave.
 let mode = "default"
@@ -48,30 +47,30 @@ addEventListener("keyup", ({ key }) => {
 // updates the cursor position and checks for hover updates.
 addEventListener("mousemove", (event) => {
 	cursor.updatePosition(canvas, event)
-	nodes.forEach((node) => {
+	circuit.nodes.forEach((node) => {
 		node.checkHover(cursor.position)
 	})
-	components.forEach((component) => {
+	circuit.components.forEach((component) => {
 		component.checkHover(cursor.position)
 	})
 })
 
 function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
 	// any overlapping is checked for, if so the function will end early.
-	const overlaps = nodes.some(node => node.checkOverlap(newNodePosition, newNodeRadius)) ||
-		components.some(component => component.checkOverlap(newNodePosition, newNodeRadius))
+	const overlaps = circuit.nodes.some(node => node.checkOverlap(newNodePosition, newNodeRadius)) ||
+		circuit.components.some(component => component.checkOverlap(newNodePosition, newNodeRadius))
 	if (overlaps) { return; }
 
 	let newNode;
 	// the newNodeType parameter only has a value if the new node is a Component
 	if (!newNodeType) {
 		newNode = new Node(newNodePosition)
-		nodes.push(newNode) // node is added to the list of nodes.
+		circuit.nodes.push(newNode) // node is added to the list of nodes.
 	} else {
 		// the is a distinct class for bulbs, this is checked for.
 		newNode = (newNodeType == "bulb") ? new Bulb(newNodePosition) :
 			new Component(newNodeType, newNodePosition)
-		components.push(newNode) // new component is added to list of components
+		circuit.components.push(newNode) // new component is added to list of components
 		cursor.heldComponent = null; // held component is removed from cursor
 	}
 	// the new node will detect whether the cursor is over it.
@@ -93,7 +92,7 @@ function checkArrayActive(arr) {
 // ran when the HTML canvas is clicked
 canvas.addEventListener("click", () => {
 	// if an component is clicked it is made active. If so the function returns early.
-	if (checkArrayActive(nodes) || checkArrayActive(components)) {
+	if (checkArrayActive(circuit.nodes) || checkArrayActive(circuit.components)) {
 		return;
 	}
 
@@ -114,9 +113,10 @@ function draw() {
 	if (cursor.activeNode) {
 		cursor.activeNode.drawActive();
 	}
+	circuit.drawWires()
 	// draws each node and component
-	components.forEach(component => component.draw(ctx))
-	nodes.forEach(node => node.draw())
+	circuit.components.forEach(component => component.draw(ctx))
+	circuit.nodes.forEach(node => node.draw())
 
 	// draws the component held by the cursor
 	if (cursor.heldComponent) {

@@ -1,8 +1,52 @@
 import * as drawShape from '../../utils/shape.js'
 import { Vector } from '../../utils/vector.js'
 import { Asset } from '../../utils/image.js'
-import { nodes, ctx } from './script.js'
+import { circuit, ctx } from './script.js'
 
+export class Circuit {
+	constructor() {
+		this.completed = false;
+		this.components = []
+		this.nodes = []
+		this.order = []
+		this.totalResistance = 0
+		this.current = 0
+	}
+	initialiseCircuit() {
+		this.components.push(new Component("battery", new Vector(405, 250), 0))
+	}
+	completeCircuit() {
+		if (this.completed) { return false }
+	}
+	calculateResistance() {
+
+	}
+	addToOrder(node) {
+		if (this.completed) { return }
+
+		if (node instanceof Component) {
+			this.totalResistance += node.resistance;
+		}
+		this.order.push(node)
+	}
+	drawWires() {
+		let currentPoint = this.order[0];
+		for (let i = 1; i < this.order.length - 1; i++) {
+			const nextPoint = this.order[i + 1];
+			if (
+				currentPoint instanceof Component ||
+				nextPoint instanceof Component
+			) {
+				i = i + 1
+				currentPoint = this.order[i + 1];
+				continue;
+			}
+
+			drawShape.line(ctx, currentPoint.position, nextPoint.position, "black");
+			currentPoint = nextPoint;
+		}
+	}
+}
 
 // keeps track of selected circuit components and mouse position.
 export class Cursor {
@@ -34,7 +78,8 @@ export const componentAssets = {
 
 export class Node {
 	static RADIUS = 10;
-	constructor(position) {
+	constructor(position, addToOrder = true) {
+		if (addToOrder) { circuit.addToOrder(this); }
 		this.position = position;
 		this.radius = Node.RADIUS
 		this._hovered = false;
@@ -69,15 +114,17 @@ export class Node {
 export class Component extends Node {
 	static RADIUS = 50;
 	constructor(type, position, resistance) {
-		super(position)
+		// false so that the component isnt added to the list of other nodes.
+		super(position, false)
 		this.radius = Component.RADIUS // overides default node radius
 
 		this.type = type // e.g. "resistor" or "ammeter"
 		this.resisitance = resistance;
 
 		this.nodeIn = new Node(this.position.add(new Vector(-32.5, 0)))
+		circuit.addToOrder(this) // the component needs to be inbetween its two nodes in the circuit's order.
 		this.nodeOut = new Node(this.position.add(new Vector(32.5, 0)))
-		nodes.push(this.nodeIn, this.nodeOut)
+		circuit.nodes.push(this.nodeIn, this.nodeOut)
 
 	}
 	clickCheck(clickPosition) {
@@ -97,7 +144,7 @@ export class Component extends Node {
 
 // the bulb will have its own properties such as changing resistance and brightness
 export class Bulb extends Component {
-		constructor(position) {
-			super("bulb", position, 1)
-		}
+	constructor(position) {
+		super("bulb", position, 1)
 	}
+}
