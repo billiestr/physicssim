@@ -1,7 +1,7 @@
 import * as drawShape from '../../utils/shape.js'
 import { Vector } from '../../utils/vector.js'
 import { Asset } from '../../utils/image.js'
-import { circuit, ctx } from './script.js'
+import { circuit, ctx, cursor } from './script.js'
 
 export class Circuit {
 	constructor() {
@@ -34,6 +34,7 @@ export class Circuit {
 		// if the circuit has already been completed, doing this again could cause errors.
 		if (this.isCompleted) { return false }
 		// circuit is connected back to the cell.
+		cursor.heldComponent = null
 		this.addToOrder(this.order[0])
 		this.isCompleted = true;
 	}

@@ -1,10 +1,10 @@
 import { Vector } from '../../utils/vector.js'
-import { Circuit, Cursor, Node, Component, Bulb, componentAssets } from './showcase.js'
+import { Circuit, Cursor, Node, Component, Bulb, componentAssets } from './classes.js'
 
 const canvas = document.getElementById('main-canvas');
 export const ctx = canvas.getContext('2d')
 	
-const cursor = new Cursor()
+export const cursor = new Cursor()
 
 // stores nodes, components and circuit related data and methods.
 export const circuit = new Circuit()

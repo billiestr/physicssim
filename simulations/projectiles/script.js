@@ -124,6 +124,10 @@ function getProjectileCurve() {
 // draws a grid of horizontal and vertical lines
 function drawGrid(maxHorizontal, maxVertical) {
 	if (maxHorizontal < 0) { return } // dont draw grid if horizontal velocity is negative
+
+	// if too many lines 
+	if (Math.max(maxHorizontal, maxVertical) >= 1000) {return}
+
 	
 	// thin lines drawn every 0.1 metres
 	drawShape.drawLines(ctx, 0.1, maxHorizontal, maxVertical, 1, "vertical", 200)
