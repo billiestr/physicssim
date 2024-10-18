@@ -5,34 +5,79 @@ import { circuit, ctx } from './script.js'
 
 export class Circuit {
 	constructor() {
-		this.completed = false;
+		this.isCompleted = false;
 		this.components = []
 		this.nodes = []
+		this.bulbs = []
 		this.order = []
+		this.emf = 5
 		this.totalResistance = 0
-		this.current = 0
+		this.current = 1
 	}
 	initialiseCircuit() {
 		this.components.push(new Component("battery", new Vector(405, 250), 0))
 	}
-	completeCircuit() {
-		if (this.completed) { return false }
-	}
-	calculateResistance() {
-
-	}
+	// any new component or node is added to the circuit order to draw wires.
 	addToOrder(node) {
-		if (this.completed) { return }
+		if (this.isCompleted) { return }
 
 		if (node instanceof Component) {
 			this.totalResistance += node.resistance;
 		}
+		if (node instanceof Bulb) {
+			this.bulbs.push(node);
+		}
 		this.order.push(node)
+	}
+	// when the user has finished making the circuit, it is reconnected to the cell
+	completeCircuit() {
+		// if the circuit has already been completed, doing this again could cause errors.
+		if (this.isCompleted) { return false }
+		// circuit is connected back to the cell.
+		this.addToOrder(this.order[0])
+		this.isCompleted = true;
+	}
+	update() {
+		// the cell's emf is updated.
+		this.components[0].potentialDifference = -this.emf;
+		// the resistance of each bulb is updated.
+		for (let i = 0; i < this.bulbs.length; i++) {
+			this.totalResistance -= this.bulbs[i].resistance;
+			this.bulbs[i].resistance = this.current**2 +1;
+			this.totalResistance += this.bulbs[i].resistance;
+		}
+		// current across the circuit is calculated
+		this.current = this.emf / this.totalResistance
+		// the voltage across each component is calculated
+		for (let i = 1; i < this.components.length; i++) {
+			this.components[i].updateVoltage(this.current);
+		}
+	}
+	// any new component or node is added to the circuit order to draw wires.
+	addToOrder(node) {
+		if (this.isCompleted) { return }
+
+		if (node instanceof Component) {
+			this.totalResistance += node.resistance;
+		}
+		if (node instanceof Bulb) {
+			this.bulbs.push(node);
+		}
+		this.order.push(node)
+	}
+	// draws wires, components and nodes.
+	draw() {
+		this.drawWires();
+		// draws each node and component
+		this.components.forEach(component => component.draw(ctx));
+		this.nodes.forEach(node => node.draw());
 	}
 	drawWires() {
 		let currentPoint = this.order[0];
 		for (let i = 1; i < this.order.length - 1; i++) {
 			const nextPoint = this.order[i + 1];
+			// a wire is not drawn between a component and its adjacent nodes.
+			// if the current or next point is a component it is skipped.
 			if (
 				currentPoint instanceof Component ||
 				nextPoint instanceof Component
@@ -41,7 +86,7 @@ export class Circuit {
 				currentPoint = this.order[i + 1];
 				continue;
 			}
-
+			// the wire is drawn
 			drawShape.line(ctx, currentPoint.position, nextPoint.position, "black");
 			currentPoint = nextPoint;
 		}
@@ -64,7 +109,7 @@ export class Cursor {
 	}
 }
 // image src for a node
-const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(20, 20))
+const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(14, 14))
 // images srcs for each component
 const componentSize = new Vector(65, 34)
 export const componentAssets = {
@@ -77,7 +122,7 @@ export const componentAssets = {
 }
 
 export class Node {
-	static RADIUS = 10;
+	static RADIUS = 7;
 	constructor(position, addToOrder = true) {
 		if (addToOrder) { circuit.addToOrder(this); }
 		this.position = position;
@@ -98,12 +143,12 @@ export class Node {
 		return this._hovered;
 	}
 	drawActive() {
-		drawShape.circle(ctx, this.position, 12, 'rgb(200, 54, 54)');
+		drawShape.circle(ctx, this.position, 9, 'rgb(200, 54, 54)');
 	}
 	draw() {
 		// visually shows the user whether the node is active/hovered over.
 		if (this._hovered) {
-			drawShape.circle(ctx, this.position, 13, 'rgba(186, 54, 54, 0.6)')
+			drawShape.circle(ctx, this.position, 10, 'rgba(186, 54, 54, 0.6)')
 		}
 		// draws the node image
 		nodeAsset.draw(ctx, this.position.x, this.position.y, 0, true)
@@ -119,13 +164,18 @@ export class Component extends Node {
 		this.radius = Component.RADIUS // overides default node radius
 
 		this.type = type // e.g. "resistor" or "ammeter"
-		this.resisitance = resistance;
+		this.resistance = resistance;
+		this.potentialDifference = 0;
 
 		this.nodeIn = new Node(this.position.add(new Vector(-32.5, 0)))
 		circuit.addToOrder(this) // the component needs to be inbetween its two nodes in the circuit's order.
 		this.nodeOut = new Node(this.position.add(new Vector(32.5, 0)))
 		circuit.nodes.push(this.nodeIn, this.nodeOut)
 
+	}
+	updateVoltage(current) {
+		this.potentialDifference = current * this.resistance;
+		return this.potentialDifference;
 	}
 	clickCheck(clickPosition) {
 		return ((Math.abs(this.position.x - clickPosition.x) < 32.5) &&
@@ -146,5 +196,12 @@ export class Component extends Node {
 export class Bulb extends Component {
 	constructor(position) {
 		super("bulb", position, 1)
+	}
+	draw(ctx) {
+		if (this._hovered) {
+			drawShape.circle(ctx, this.position, this.radius, 'rgba(186, 54, 54, 0.3)')
+		}
+		const bulbAssetName = circuit.isCompleted ? "bulb-on" : "bulb"
+		componentAssets[bulbAssetName].draw(ctx, ...this.position.array(), 0, true)
 	}
 }

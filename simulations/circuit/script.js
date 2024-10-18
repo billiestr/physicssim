@@ -1,20 +1,17 @@
 import { Vector } from '../../utils/vector.js'
-import { Circuit, Cursor, Node, Component, Bulb, componentAssets } from './classes.js'
+import { Circuit, Cursor, Node, Component, Bulb, componentAssets } from './showcase.js'
 
 const canvas = document.getElementById('main-canvas');
 export const ctx = canvas.getContext('2d')
-
-
 	
 const cursor = new Cursor()
 
-// lists of all creates nodes and components in the canvas.
+// stores nodes, components and circuit related data and methods.
 export const circuit = new Circuit()
 circuit.initialiseCircuit()
 
-// tells the program how to behave.
-let mode = "default"
-
+const componentMenu = document.getElementById("component-menu")
+const nodeMenu = document.getElementById("node-menu")
 
 
 // HTML Component Buttons are linked to their respective component
@@ -22,6 +19,11 @@ for (const component of ["bulb", "ammeter", "resistor", "diode"]) {
 	document.getElementById(component).onclick = () => {
 		cursor.heldComponent = component;
 	}
+}
+
+document.getElementById("complete-circuit-button").onclick = () => {
+	circuit.completeCircuit()
+	componentMenu.classList.add("hidden")
 }
 
 // resizes the canvas to match the display size
@@ -69,7 +71,7 @@ function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
 	} else {
 		// the is a distinct class for bulbs, this is checked for.
 		newNode = (newNodeType == "bulb") ? new Bulb(newNodePosition) :
-			new Component(newNodeType, newNodePosition)
+			new Component(newNodeType, newNodePosition, 1)
 		circuit.components.push(newNode) // new component is added to list of components
 		cursor.heldComponent = null; // held component is removed from cursor
 	}
@@ -92,10 +94,10 @@ function checkArrayActive(arr) {
 // ran when the HTML canvas is clicked
 canvas.addEventListener("click", () => {
 	// if an component is clicked it is made active. If so the function returns early.
-	if (checkArrayActive(circuit.nodes) || checkArrayActive(circuit.components)) {
+	if (checkArrayActive(circuit.nodes) || checkArrayActive(circuit.components) || circuit.isCompleted) {
 		return;
 	}
-
+	
 	// if nothing has been selected, it will attempt to place a node or component
 	const newNodeRadius = cursor.heldComponent ? Component.RADIUS : Node.RADIUS;
 	placeNewNode(cursor.heldComponent, cursor.position, newNodeRadius)
@@ -104,7 +106,7 @@ canvas.addEventListener("click", () => {
 
 
 
-// draws each component and node
+// updates the canvas, redraws nodes, selections and held components.
 function draw() {
 	ctx.fillStyle = "green";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -113,10 +115,9 @@ function draw() {
 	if (cursor.activeNode) {
 		cursor.activeNode.drawActive();
 	}
-	circuit.drawWires()
-	// draws each node and component
-	circuit.components.forEach(component => component.draw(ctx))
-	circuit.nodes.forEach(node => node.draw())
+
+	// draws wires, components, and nodes
+	circuit.draw()
 
 	// draws the component held by the cursor
 	if (cursor.heldComponent) {
@@ -124,9 +125,36 @@ function draw() {
 	}
 }
 
+// used to round inputs to two decimals places
+function twoDP(number) {
+	return Math.round(number * 100) / 100
+}
+
 // main program loop ran each frame.
 function loop() {
 	draw()
+	
+	if (circuit.isCompleted) {
+		circuit.update();
+	}
+	
+	if (circuit.isCompleted && cursor.activeNode) {
+		const node = cursor.activeNode;
+		nodeMenu.classList.toggle("hidden", false)
+		if (node instanceof Component) {
+			nodeMenu.innerHTML = `
+				Type: ${node.type}<br>
+				Voltage: ${twoDP(node.potentialDifference)}<br>
+				Current: ${twoDP(circuit.current)}<br>
+				Resistance: ${twoDP(node.resistance)}<br>
+				Power: ${twoDP(node.potentialDifference * circuit.current)}<br>
+			`;
+		} else {
+			nodeMenu.innerHTML = `Type: Node<br>Current: ${twoDP(circuit.current)}`
+		}
+	} else {
+		nodeMenu.classList.toggle("hidden", true)
+	}
 
 	requestAnimationFrame(loop)
 }

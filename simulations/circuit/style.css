@@ -6,11 +6,15 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
-#component-menu {
+#component-menu, #node-menu {
     padding: 10px;
     left: 100px;
     position: absolute;
     object-fit: contain;
+    height: 100px;
+}
+#node-menu {
+    width: 200px;
     height: 100px;
 }
 #component-menu > button {
