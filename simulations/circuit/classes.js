@@ -41,17 +41,13 @@ export class Circuit {
 		// current across the circuit is calculated
 		this.current = this.emf / this.totalResistance
 		
-		let reversedDiode = false;
 		// the resistance of each diode is updated.
 		for (const diode of this.diodes) {
 			const current = diode.reversed ? -this.current : this.current;
-			console.log(current)
 			if (current <= 0) {
 				diode.resistance = Infinity;
-				console.log(this.emf)
 				diode.potentialDifference = this.emf;
 				this.current = 0;
-				reversedDiode = true
 			} else {
 				diode.resistance = 0;
 			}
@@ -61,6 +57,29 @@ export class Circuit {
 			this.components[i].updateVoltage(this.current, this.emf);
 			console.log()
 		}
+	}
+	removeLastNode() {
+		if (this.order.length <= 1) { return false }
+		if (this.isCompleted) {
+			this.isCompleted = false;
+			this.order.pop();
+			return;
+		}
+		
+		const removedNode = this.order.pop();
+
+		if (removedNode instanceof Component) {
+			console.log(this.nodes.length)
+			this.nodes.splice(this.nodes.length-2)
+			for (const arr of [this.components, this.bulbs, this.diodes]) {
+				if (arr[arr.length-1] === removedNode) {
+					arr.pop();
+				}
+			}
+		} else {
+			this.nodes.pop()
+		}
+		return removedNode
 	}
 	// any new component or node is added to the circuit order to draw wires.
 	addToOrder(node) {
