@@ -181,6 +181,7 @@ function titleCase(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
+let selectedResistor;
 // main program loop ran each frame.
 function loop() {
 	draw()
@@ -196,7 +197,9 @@ function loop() {
 		nodeMenu.classList.toggle("hidden", false)
 
 		if (node.type == "resistor") {
-			if (resistanceInputContainer.classList.contains("hidden")) {
+			selectedResistor
+			if (node !== selectedResistor) {
+				selectedResistor = node;
 				resistanceInputContainer.classList.toggle("hidden", false);
 				resistanceInput.value = node.resistance;
 				resistanceInput.onchange = () => {
