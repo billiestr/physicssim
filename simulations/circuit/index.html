@@ -13,11 +13,23 @@
 	<a href="../../" id="menu-button">
 		<button type="">Menu</button>
 	</a>
+	
+	<div id="info-menu" class="white rounded">
+		<h3>Information</h3>
+		<ul>
+			<li>Click a component to select it, and see its data.</li>
+			<li>A selected component's wires can be flipped by clicking it again.</li>
+			<li>You can change a resistor's resistance in the info menu.</li>
+			<li>Press Ctrl-z to undo the last action taken.</li>
+		</ul>
+	</div>
+
 	<div id="cell-menu" class="glass rounded">
 		<h3>Cell Menu</h3>
 		emf:<br/><input id="emf-input" type="number" value="5">V<br/>
 		Internal Resistance:<br/><input id="r-input" type="number" value="0" min=0 step="0.1">Ω
 	</div>
+	
 	<div id="node-menu" class="glass rounded hidden">
 		<div id="resistance-input-container" class="hidden">
 			Resistance: <input id="resistance-input" min="0" type="number">Ω
