@@ -20,7 +20,6 @@ canvas {
     right: 10px;
     position: absolute;
     object-fit:contain;
-    width: 200px;
 }
 #node-menu {
     width: 200px;
