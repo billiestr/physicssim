@@ -16,7 +16,7 @@ export class Circuit {
 		this.current = 1
 	}
 	initialiseCircuit() {
-		this.components.push(new Component("cell", new Vector(405, 250), 0))
+		this.components.push(new Component("cell", new Vector(600, 250), 0))
 	}
 	
 	// when the user has finished making the circuit, it is reconnected to the cell
@@ -33,8 +33,9 @@ export class Circuit {
 		this.components[0].potentialDifference = -this.emf;
 		// the resistance of each bulb is updated.
 		for (const bulb of this.bulbs) {
+			console.log(bulb.resistance)
 			this.totalResistance -= bulb.resistance;
-			bulb.resistance = this.current**2 +1;
+			bulb.resistance = this.current * bulb.potentialDifference + 1;
 			this.totalResistance += bulb.resistance;
 		}
 

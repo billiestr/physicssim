@@ -55,7 +55,6 @@ addEventListener("resize", resetCanvasResolution)
 addEventListener("keyup", ({ key }) => {
 	switch (key) {
 		case "Escape":
-			mode = "default"
 			cursor.heldComponent = null;
 			break;
 	}
@@ -107,7 +106,7 @@ function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
 				newNode = new Component(newNodeType, newNodePosition, resistance);
 				break;
 			default:
-				newNode = new Component(newNodeType, newNodePosition, 1);
+				newNode = new Component(newNodeType, newNodePosition, 0);
 				break;
 		}
 		circuit.components.push(newNode) // new component is added to list of components
@@ -138,9 +137,11 @@ canvas.addEventListener("click", () => {
 	// if an component is clicked it is made active. If so the function returns early.
 	if (
 		checkArrayActive(circuit.nodes) || 
-		checkArrayActive(circuit.components) || 
-		circuit.isCompleted
-	) {
+		checkArrayActive(circuit.components)
+	) { 
+		return; 
+	} else if (circuit.isCompleted) {
+		cursor.activeNode = null;
 		return;
 	}
 	
@@ -252,19 +253,6 @@ function loop() {
 				`;
 				break;
 		}
-		/*
-		if (node instanceof Component) {
-			nodeMenu.innerHTML = `
-				Type: ${node.type}<br>
-				Voltage: ${round(node.potentialDifference)}<br>
-				Current: ${round(circuit.current)}<br>
-				Resistance: ${round(node.resistance)}<br>
-				Power: ${round(circuit.current * node.potentialDifference)}<br>
-			`;
-		} else {
-			nodeMenu.innerHTML = `Type: Node<br>Current: ${round(circuit.current)}`
-		}
-		*/
 	} else {
 		nodeMenu.classList.toggle("hidden", true)
 	}

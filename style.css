@@ -12,7 +12,7 @@ a {
 	position: fixed;
 	left: 50%;
 	top: 50%;
-	transform:  translate(-50%, -50%) scale(2);
+	transform:  translate(-50%, -50%) scale(1.2);
 	object-fit: contain;
 	overflow-y: auto;
 }
@@ -21,7 +21,7 @@ a {
 	width: 210px;
 	height: 250px;
 	vertical-align: top;
-	margin: 6px;
+	margin: 20px;
 	padding: 20px;
 	display: inline-block;
 	

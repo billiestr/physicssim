@@ -35,8 +35,9 @@ canvas {
 input[type="number"] {
     width: 50%;
 }
-h3 {
+h3, h4, ul {
     margin: 2px;
+    margin-bottom: 4px;
 }
 #component-menu > button {
     margin-top: 5px;
