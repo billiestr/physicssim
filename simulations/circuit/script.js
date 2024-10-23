@@ -146,7 +146,7 @@ canvas.addEventListener("click", () => {
 
 // updates the canvas, redraws nodes, selections and held components.
 function draw() {
-	ctx.fillStyle = "#654D6D"
+	ctx.fillStyle = "#665c70"
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	// draws a circle around a node if active
