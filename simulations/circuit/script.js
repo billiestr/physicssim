@@ -56,6 +56,7 @@ addEventListener("keyup", ({ key }) => {
 	switch (key) {
 		case "Escape":
 			cursor.heldComponent = null;
+			cursor.activeNode = null;
 			break;
 	}
 })
