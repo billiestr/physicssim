@@ -93,9 +93,10 @@ export function drawParametricFunction(
 	ctx.restore() // all graphical context changes are reset the state saved before
 }
 
-export function line(ctx, point1, point2, colour = 'red') {
+export function line(ctx, point1, point2, colour = 'red', thickness="5px") {
 	ctx.save()
 	ctx.strokeStyle = colour;
+	ctx.lineWidth = thickness;
 	// Start a new Path
 	ctx.beginPath();
 	ctx.moveTo(point1.x, point1.y);

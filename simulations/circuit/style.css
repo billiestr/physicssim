@@ -6,16 +6,31 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
-#component-menu, #node-menu {
+#component-menu, #node-menu, #cell-menu {
     padding: 10px;
-    left: 100px;
+    left: 330px;
     position: absolute;
-    object-fit: contain;
+    object-fit:contain;
+    width: 714px;
     height: 100px;
+    overflow: hidden;
 }
 #node-menu {
     width: 200px;
-    height: 100px;
+    height:auto;
+    object-fit: contain;
+}
+#cell-menu {
+    background-color: rgba(255, 255, 255, 0.3);
+    left: 100px;
+    height: 120px;
+    width: 200px;
+}
+input[type="number"] {
+    width: 50%;
+}
+h3 {
+    margin: 2px;
 }
 #component-menu > button {
     margin-top: 5px;

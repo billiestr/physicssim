@@ -9,26 +9,16 @@ export class Circuit {
 		this.components = []
 		this.nodes = []
 		this.bulbs = []
+		this.diodes = []
 		this.order = []
 		this.emf = 5
 		this.totalResistance = 0
 		this.current = 1
 	}
 	initialiseCircuit() {
-		this.components.push(new Component("battery", new Vector(405, 250), 0))
+		this.components.push(new Component("cell", new Vector(405, 250), 0))
 	}
-	// any new component or node is added to the circuit order to draw wires.
-	addToOrder(node) {
-		if (this.isCompleted) { return }
-
-		if (node instanceof Component) {
-			this.totalResistance += node.resistance;
-		}
-		if (node instanceof Bulb) {
-			this.bulbs.push(node);
-		}
-		this.order.push(node)
-	}
+	
 	// when the user has finished making the circuit, it is reconnected to the cell
 	completeCircuit() {
 		// if the circuit has already been completed, doing this again could cause errors.
@@ -42,16 +32,34 @@ export class Circuit {
 		// the cell's emf is updated.
 		this.components[0].potentialDifference = -this.emf;
 		// the resistance of each bulb is updated.
-		for (let i = 0; i < this.bulbs.length; i++) {
-			this.totalResistance -= this.bulbs[i].resistance;
-			this.bulbs[i].resistance = this.current**2 +1;
-			this.totalResistance += this.bulbs[i].resistance;
+		for (const bulb of this.bulbs) {
+			this.totalResistance -= bulb.resistance;
+			bulb.resistance = this.current**2 +1;
+			this.totalResistance += bulb.resistance;
 		}
+
 		// current across the circuit is calculated
 		this.current = this.emf / this.totalResistance
+		
+		let reversedDiode = false;
+		// the resistance of each diode is updated.
+		for (const diode of this.diodes) {
+			const current = diode.reversed ? -this.current : this.current;
+			console.log(current)
+			if (current <= 0) {
+				diode.resistance = Infinity;
+				console.log(this.emf)
+				diode.potentialDifference = this.emf;
+				this.current = 0;
+				reversedDiode = true
+			} else {
+				diode.resistance = 0;
+			}
+		}
 		// the voltage across each component is calculated
-		for (let i = 1; i < this.components.length; i++) {
-			this.components[i].updateVoltage(this.current);
+		for (let i = 0; i < this.components.length; i++) {
+			this.components[i].updateVoltage(this.current, this.emf);
+			console.log()
 		}
 	}
 	// any new component or node is added to the circuit order to draw wires.
@@ -64,6 +72,9 @@ export class Circuit {
 		if (node instanceof Bulb) {
 			this.bulbs.push(node);
 		}
+		if (node.type == "diode") {
+			this.diodes.push(node)
+		}
 		this.order.push(node)
 	}
 	// draws wires, components and nodes.
@@ -74,21 +85,29 @@ export class Circuit {
 		this.nodes.forEach(node => node.draw());
 	}
 	drawWires() {
-		let currentPoint = this.order[0];
-		for (let i = 1; i < this.order.length - 1; i++) {
-			const nextPoint = this.order[i + 1];
-			// a wire is not drawn between a component and its adjacent nodes.
-			// if the current or next point is a component it is skipped.
-			if (
-				currentPoint instanceof Component ||
-				nextPoint instanceof Component
-			) {
-				i = i + 1
-				currentPoint = this.order[i + 1];
-				continue;
+		let currentPoint = this.order[0].nodeOut;
+		for (let i = 1; i < this.order.length; i++) {
+			let nextPoint = this.order[i];
+
+			if (nextPoint instanceof Component) {
+				drawShape.line(ctx, currentPoint.position, nextPoint.nodeIn.position, "black", 2);
+				nextPoint = nextPoint.nodeOut
+			} else {
+				drawShape.line(ctx, currentPoint.position, nextPoint.position, "black", 2);
 			}
-			// the wire is drawn
-			drawShape.line(ctx, currentPoint.position, nextPoint.position, "black");
+			
+			// a wire is not drawn between a component and its adjacent nodes.
+			// // if the current or next point is a component it is skipped.
+			// if (
+			// 	currentPoint instanceof Component ||
+			// 	nextPoint instanceof Component
+			// ) {
+			// 	i = i + 1
+			// 	currentPoint = this.order[i + 1];
+			// 	continue;
+			// }
+			// // the wire is drawn
+			// drawShape.line(ctx, currentPoint.position, nextPoint.position, "black");
 			currentPoint = nextPoint;
 		}
 	}
@@ -109,21 +128,23 @@ export class Cursor {
 		this.position = new Vector(x, y);
 	}
 }
+
+
 // image src for a node
-const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(14, 14))
+const nodeAsset = new Asset('../../assets/circuit/node.webp', new Vector(7, 7))
 // images srcs for each component
 const componentSize = new Vector(65, 34)
 export const componentAssets = {
-	'battery': new Asset("../../assets/circuit/battery.png", componentSize),
-	'bulb-on': new Asset("../../assets/circuit/lighton.png", componentSize),
-	'bulb': new Asset("../../assets/circuit/lightoff.png", componentSize),
+	'cell': new Asset("../../assets/circuit/cell.png", componentSize),
+	'bulb-on': new Asset("../../assets/circuit/bulb-on.png", componentSize),
+	'bulb': new Asset("../../assets/circuit/bulb.png", componentSize),
 	'ammeter': new Asset("../../assets/circuit/ammeter.png", componentSize),
 	'resistor': new Asset("../../assets/circuit/resistor.png", componentSize),
 	'diode': new Asset("../../assets/circuit/diode.png", componentSize)
 }
 
 export class Node {
-	static RADIUS = 7;
+	static RADIUS = 3.5;
 	constructor(position, addToOrder = true) {
 		if (addToOrder) { circuit.addToOrder(this); }
 		this.position = position;
@@ -144,12 +165,12 @@ export class Node {
 		return this._hovered;
 	}
 	drawActive() {
-		drawShape.circle(ctx, this.position, 9, 'rgb(200, 54, 54)');
+		drawShape.circle(ctx, this.position, 5, 'rgb(200, 54, 54)');
 	}
 	draw() {
 		// visually shows the user whether the node is active/hovered over.
 		if (this._hovered) {
-			drawShape.circle(ctx, this.position, 10, 'rgba(186, 54, 54, 0.6)')
+			drawShape.circle(ctx, this.position, 7, 'rgba(186, 54, 54, 0.6)')
 		}
 		// draws the node image
 		nodeAsset.draw(ctx, this.position.x, this.position.y, 0, true)
@@ -168,14 +189,23 @@ export class Component extends Node {
 		this.resistance = resistance;
 		this.potentialDifference = 0;
 
-		this.nodeIn = new Node(this.position.add(new Vector(-32.5, 0)))
+		this.reversed = false;
+
+		this.nodeIn = new Node(this.position.add(new Vector(-32.5, 0)), false)
 		circuit.addToOrder(this) // the component needs to be inbetween its two nodes in the circuit's order.
-		this.nodeOut = new Node(this.position.add(new Vector(32.5, 0)))
+		this.nodeOut = new Node(this.position.add(new Vector(32.5, 0)), false)
 		circuit.nodes.push(this.nodeIn, this.nodeOut)
 
 	}
-	updateVoltage(current) {
+	reverse() {
+		this.reversed = !this.reversed;
+		[this["nodeIn"], this["nodeOut"]] = [this.nodeOut, this.nodeIn]
+	}
+	updateVoltage(current, emf) {
 		this.potentialDifference = current * this.resistance;
+		if (this.type == "cell") {
+			this.potentialDifference -= emf
+		}
 		return this.potentialDifference;
 	}
 	clickCheck(clickPosition) {
