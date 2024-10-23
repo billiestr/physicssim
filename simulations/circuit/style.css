@@ -15,6 +15,12 @@ canvas {
     height: 100px;
     overflow: hidden;
 }
+#info-menu {
+    padding: 10px;
+    right: 10px;
+    position: absolute;
+    object-fit:contain;
+}
 #node-menu {
     width: 200px;
     height:auto;
