@@ -76,11 +76,14 @@ addEventListener("keyup", ({ key }) => {
 // detects when "ctrl-z" is pressed to remove the last added node
 addEventListener("keydown", (event) => {
 	if (event.ctrlKey && event.key.toLowerCase() === "z") {
+		// prevents ctrl-z from undoing other inputs
 		event.preventDefault()
+		// either the last node is removed or the circuit is incompleted if it had been.
 		circuit.removeLastNode()
+		componentMenu.classList.remove("hidden")
+		// any active or held components are removed.
 		cursor.activeNode = null;
 		cursor.heldComponent = null;
-		componentMenu.classList.remove("hidden")
 	}
 }) 
 
@@ -139,10 +142,13 @@ function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
 // if so, it updates the cursors activeNode property.
 function checkArrayActive(arr) {
 	for (const node of arr) {
+		// if the node is being hovered over
 		if (node.checkActive()) {
+			// if the node isn't already active
 			if (cursor.activeNode !== node) {
 				cursor.activeNode = node;
 			} else if (node instanceof Component) {
+				// reverse the direction of the component
 				node.reverse()
 			}
 			return true;

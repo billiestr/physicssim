@@ -45,6 +45,7 @@ export class Circuit {
 		// the resistance of each diode is updated.
 		for (const diode of this.diodes) {
 			const current = diode.reversed ? -this.current : this.current;
+			// if the current is flowing backwards through the diode, resistance should be infinity, else 0
 			if (current <= 0) {
 				diode.resistance = Infinity;
 				diode.potentialDifference = this.emf;
@@ -60,27 +61,32 @@ export class Circuit {
 		}
 	}
 	removeLastNode() {
-		if (this.order.length <= 1) { return false }
+		// if the circuit has been completed, revert back 
 		if (this.isCompleted) {
 			this.isCompleted = false;
 			this.order.pop();
 			return;
 		}
+		// if there is only the initial cell left, don't remove anything.
+		if (this.order.length <= 1) { return false }
 		
 		const removedNode = this.order.pop();
 
+		// the removed node has to also be removed from any other arrays that include it.
 		if (removedNode instanceof Component) {
-			console.log(this.nodes.length)
+			// the components in/out nodes are removed.
 			this.nodes.splice(this.nodes.length-2)
+			// the component is removed from the end of any other array.
 			for (const arr of [this.components, this.bulbs, this.diodes]) {
 				if (arr[arr.length-1] === removedNode) {
 					arr.pop();
 				}
 			}
 		} else {
+			// the node is removed from the nodes array
 			this.nodes.pop()
 		}
-		return removedNode
+		return removedNode;
 	}
 	// any new component or node is added to the circuit order to draw wires.
 	addToOrder(node) {
