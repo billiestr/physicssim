@@ -65,6 +65,8 @@ addEventListener("keyup", ({ key }) => {
 addEventListener("keyup", ({key, ctrlKey}) => {
 	if (ctrlKey && key.toLowerCase() === "z") {
 		circuit.removeLastNode()
+		cursor.activeNode = null;
+		cursor.heldComponent = null;
 		componentMenu.classList.remove("hidden")
 	}
 })
