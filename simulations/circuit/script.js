@@ -244,7 +244,7 @@ function loop() {
 					emf: ${round(circuit.emf)} V<br>
 					Voltage: ${round(node.potentialDifference)} V<br>
 					Lost volts: ${round(node.potentialDifference+circuit.emf)} V<br>
-					Current: ${round(circuit.current)} I<br>
+					Current: ${round(circuit.current)} A<br>
 					Resistance: ${round(node.resistance)} Ω<br>
 					Power: ${round(circuit.current * node.potentialDifference)} W<br>
 				`;
@@ -270,7 +270,7 @@ function loop() {
 					<h3>Component Info</h3>
 					Type: ${titleCase(node.type)}<br>
 					Voltage: ${round(node.potentialDifference)} V<br>
-					Current: ${round(circuit.current)} I<br>
+					Current: ${round(circuit.current)} A<br>
 					Resistance: ${round(node.resistance)} Ω<br>
 					Power: ${round(circuit.current * node.potentialDifference)} W<br>
 				`;
