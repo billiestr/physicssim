@@ -13,7 +13,7 @@ export class Circuit {
 		this.order = []
 		this.emf = 5
 		this.totalResistance = 0
-		this.current = 1
+		this.current = 0
 	}
 	initialiseCircuit() {
 		this.components.push(new Component("cell", new Vector(600, 250), 0))
@@ -252,7 +252,7 @@ export class Bulb extends Component {
 		if (this._hovered) {
 			drawShape.circle(ctx, this.position, this.radius, 'rgba(186, 54, 54, 0.3)')
 		}
-		const bulbAssetName = circuit.isCompleted ? "bulb-on" : "bulb"
+		const bulbAssetName = circuit.current > 0.001 ? "bulb-on" : "bulb"
 		componentAssets[bulbAssetName].draw(ctx, ...this.position.array(), 0, true)
 	}
 }
