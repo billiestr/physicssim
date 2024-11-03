@@ -31,9 +31,9 @@ export class Circuit {
 	update() {
 		// the cell's emf is updated.
 		this.components[0].potentialDifference = -this.emf;
+		
 		// the resistance of each bulb is updated.
 		for (const bulb of this.bulbs) {
-			console.log(bulb.resistance)
 			this.totalResistance -= bulb.resistance;
 			bulb.resistance = this.current * bulb.potentialDifference + 1;
 			this.totalResistance += bulb.resistance;

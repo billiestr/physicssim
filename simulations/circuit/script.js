@@ -15,15 +15,27 @@ const nodeMenu = document.getElementById("node-menu")
 const resistanceInput = document.getElementById("resistance-input")
 const resistanceInputContainer = document.getElementById("resistance-input-container")
 
+// updates a components resistance from an input (with validation)
+function updateResistance(inputElement, component) {
+	const newResistance = parseFloat(inputElement.value)
+	// input validation for resistance input
+	if (isNaN(newResistance) || newResistance < 0) {
+		// user is alerted that their input is invalid and input field is reverted.
+		window.alert("Inputs must be non-negative numbers.")
+		inputElement.value = component.resistance;
+	} else {
+		// nodes resistance is inputted
+		circuit.totalResistance += newResistance - component.resistance
+		component.resistance = newResistance
+	}
+}
 
-
+// the cell menu inputs are setup to update the correct values
 document.getElementById("emf-input").onchange = ({target}) => {
-	circuit.emf = parseFloat(target.value)
+	circuit.emf = parseFloat(target.value);
 }
 document.getElementById("r-input").onchange = ({target}) => {
-	circuit.totalResistance -= circuit.components[0].resistance
-	circuit.components[0].resistance = parseFloat(target.value)
-	circuit.totalResistance += circuit.components[0].resistance
+	updateResistance(target, circuit.components[0]);
 }
 
 
@@ -100,8 +112,10 @@ function placeNewNode(newNodeType, newNodePosition, newNodeRadius) {
 				newNode = new Bulb(newNodePosition);
 				break;
 			case "resistor":
+				// user is forced to enter a valid value for resistance
+				// resistance must be a number and greater than zero
 				let resistance;
-					while  (isNaN(resistance) || resistance < 0) {
+				while  (isNaN(resistance) || resistance < 0) {
 					resistance = parseFloat(prompt(
 						"Enter a valid value for resistance. (this can be changed later)", "1"
 					))
@@ -200,15 +214,14 @@ function loop() {
 		// menu is shown
 		nodeMenu.classList.toggle("hidden", false)
 
+		// is the selected mode is a resistor, show the resistance input field.
 		if (node.type == "resistor") {
-			selectedResistor
 			if (node !== selectedResistor) {
 				selectedResistor = node;
 				resistanceInputContainer.classList.toggle("hidden", false);
 				resistanceInput.value = node.resistance;
 				resistanceInput.onchange = () => {
-					circuit.totalResistance += parseFloat(resistanceInput.value) - node.resistance
-					node.resistance = parseFloat(resistanceInput.value)
+					updateResistance(resistanceInput, selectedResistor)
 				}
 			}
 		} else {
