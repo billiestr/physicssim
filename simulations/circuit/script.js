@@ -73,17 +73,16 @@ addEventListener("keyup", ({ key }) => {
 	}
 })
 
-
 // detects when "ctrl-z" is pressed to remove the last added node
-addEventListener("keyup", ({preventDefault, key, ctrlKey}) => {
-	preventDefault()
-	if (ctrlKey && key.toLowerCase() === "z") {
+addEventListener("keydown", (event) => {
+	if (event.ctrlKey && event.key.toLowerCase() === "z") {
+		event.preventDefault()
 		circuit.removeLastNode()
 		cursor.activeNode = null;
 		cursor.heldComponent = null;
 		componentMenu.classList.remove("hidden")
 	}
-})
+}) 
 
 // updates the cursor position and checks for hover updates.
 addEventListener("mousemove", (event) => {
