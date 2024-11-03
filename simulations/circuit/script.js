@@ -73,8 +73,10 @@ addEventListener("keyup", ({ key }) => {
 	}
 })
 
+
 // detects when "ctrl-z" is pressed to remove the last added node
-addEventListener("keyup", ({key, ctrlKey}) => {
+addEventListener("keyup", ({preventDefault, key, ctrlKey}) => {
+	preventDefault()
 	if (ctrlKey && key.toLowerCase() === "z") {
 		circuit.removeLastNode()
 		cursor.activeNode = null;
