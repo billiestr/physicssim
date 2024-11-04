@@ -17,6 +17,7 @@ class Menu {
 		this._wavespeedSlider = document.getElementById("wavespeed-slider")
 		this._wavespeedOutput = document.getElementById("wavespeed-output")
 		this._wavelengthSlider.oninput = () => {
+			// wavelength is changed and frequency is updated
 			const wavelength = this._wavelengthSlider.value
 			if (wavelength > 0) { // prevents dividing by 0
 				this.wavelength = wavelength
@@ -39,6 +40,7 @@ class Menu {
 	}
 	get wavelength() { return this._wavelength}
 	get wavespeed() { return this._wavespeed}
+	// set functions update the objects property aswell as the html output
 	set wavelength(value) {
 		const wavelength = Math.round(value*100)/100
 		this._wavelength = wavelength
@@ -56,6 +58,7 @@ class Menu {
 		this._frequencyOutput.innerText = frequency
 	}
 }
+
 class Time {
 	constructor() {
 		this.lastTime = Date.now();
